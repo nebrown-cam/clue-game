@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clue Online</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Join Screen -->
+    <div id="join-screen" class="screen">
+        <h1>Time for Clue!</h1>
+        <div class="join-form">
+            <input type="text" id="player-name" placeholder="Your Name" maxlength="20">
+            <input type="text" id="room-code" placeholder="Room Code (1-999)" maxlength="3">
+            <button id="join-btn">Join Game</button>
+        </div>
+        <p id="error-message" class="error"></p>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div id="lobby-screen" class="screen hidden">
+        <div class="lobby-container">
+            <h2>Room: <span id="display-room-code"></span></h2>
+            <div class="players-list">
+                <h3>Players:</h3>
+                <ul id="players"></ul>
+            </div>
+            <p class="waiting-message" id="waiting-message">Waiting for players...</p>
+            <button id="start-btn" class="hidden">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen hidden">
+        <!-- Header -->
+        <div class="game-header">
+            <div class="header-left">
+                <span class="game-title">Clue Online</span>
+            </div>
+            <div class="header-center">
+                <span>Room: <span id="game-room-code"></span></span>
+                <span id="player-count"></span>
+            </div>
+            <div class="header-right" id="host-controls">
+                <button id="pause-btn" class="small-btn hidden">Pause</button>
+                <button id="end-btn" class="small-btn hidden">End Game</button>
+            </div>
+        </div>
+
+        <!-- Main Game Layout -->
+        <div class="game-layout">
+            <!-- Left Side: Game Board -->
+            <div class="board-container">
+                <div id="game-board">
+                    <img id="board-image" src="images/ClueGameBoard.jpg" alt="Clue Game Board">
+                    <div id="board-overlay">
+                        <!-- Pawns will be rendered here -->
+                        <div id="pawns-layer"></div>
+                        <!-- Weapons will be rendered here -->
+                        <div id="weapons-layer"></div>
+                        <!-- Click targets for rooms -->
+                        <div id="click-layer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Controls Panel -->
+            <div class="controls-panel">
+                <!-- Players Section -->
+                <div class="panel-section">
+                    <h3>Players</h3>
+                    <ul id="game-players"></ul>
+                </div>
+
+                <!-- Turn Info Section -->
+                <div class="panel-section">
+                    <h3>Turn Info</h3>
+                    <div id="turn-info"></div>
+                </div>
+
+                <!-- Your Cards Section -->
+                <div class="panel-section">
+                    <h3>Your Cards</h3>
+                    <div id="your-cards" class="cards-container"></div>
+                    <div class="card-buttons hidden" id="card-action-buttons">
+                        <button id="show-card-action-btn" disabled>Show</button>
+                        <button id="pass-card-btn" disabled>Pass</button>
+                    </div>
+                </div>
+
+                <!-- Controls Section -->
+                <div class="panel-section">
+                    <h3>Controls</h3>
+                    <div class="control-group control-row-inline">
+                        <button id="roll-btn" disabled>Roll Dice</button>
+                        <button id="stay-btn" disabled>Stay Put</button>
+                        <button id="passage-btn" disabled>Use Passage</button>
+                    </div>
+                    <div class="control-group suggestion-controls">
+                        <label>Suggest:</label>
+                        <div class="select-row">
+                            <select id="suggest-suspect" disabled>
+                                <option value="">-- Suspect --</option>
+                            </select>
+                            <select id="suggest-weapon" disabled>
+                                <option value="">-- Weapon --</option>
+                            </select>
+                        </div>
+                        <button id="suggest-btn" disabled>Make Suggestion</button>
+                    </div>
+                    <div class="control-group">
+                        <button id="end-turn-btn" disabled>End Turn</button>
+                    </div>                    
+                    <div class="control-group accusation-controls">
+                        <label>Accuse:</label>
+                        <div class="select-row">
+                            <select id="accuse-suspect" disabled>
+                                <option value="">-- Suspect --</option>
+                            </select>
+                            <select id="accuse-weapon" disabled>
+                                <option value="">-- Weapon --</option>
+                            </select>
+                            <select id="accuse-room" disabled>
+                                <option value="">-- Room --</option>
+                            </select>
+                        </div>
+                        <button id="accuse-btn" disabled>Make Accusation</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Reveal Panel (slides in from bottom right) -->
+    <div id="card-reveal-panel" class="hidden">
+        <div class="card-reveal-content">
+            <p id="card-reveal-text"></p>
+            <div id="revealed-card"></div>
+            <button id="card-reveal-done">Done</button>
+        </div>
+    </div>
+
+    <!-- Disprove Panel -->
+    <div id="disprove-panel" class="hidden">
+        <div class="disprove-content">
+            <h3>Disprove the Suggestion</h3>
+            <p id="disprove-text"></p>
+            <div id="disprove-cards" class="cards-container"></div>
+            <div class="disprove-buttons">
+                <button id="show-card-btn" disabled>Show Selected Card</button>
+                <button id="cannot-disprove-btn" class="hidden">Cannot Disprove</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accusation Confirmation Modal -->
+    <div id="accusation-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Are you sure?</h2>
+            <p>A wrong accusation eliminates you from the game.</p>
+            <div class="modal-buttons">
+                <button id="cancel-accusation">Cancel</button>
+                <button id="confirm-accusation">Accuse</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Screen Modal -->
+    <div id="win-modal" class="modal hidden">
+        <div class="modal-content win-content">
+            <h2 id="win-title"></h2>
+            <p>The solution was:</p>
+            <div id="solution-cards" class="solution-display"></div>
+            <button id="close-win-modal">Close</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

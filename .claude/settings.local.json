@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s /b \"C:\\\\Users\\\\nebro\\\\documents\\\\rook-game\\\\*.js\")",
+      "Bash(findstr:*)",
+      "Bash(dir /s /b \"C:\\\\Users\\\\nebro\\\\documents\\\\rook-game\\\\*.html\")",
+      "Bash(dir /s /b \"C:\\\\Users\\\\nebro\\\\documents\\\\rook-game\\\\*.css\")",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
