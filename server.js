@@ -60,7 +60,8 @@ io.on('connection', (socket) => {
                 pawns: {},
                 weapons: {},
                 playerCards: {},
-                lastSuggestionRoom: {} // Track last room each player suggested in
+                lastSuggestionRoom: {}, // Track last room each player suggested in
+                playersClosedModal: [] // Track who has closed the win modal
             };
         }
 
@@ -640,6 +641,86 @@ io.on('connection', (socket) => {
         }
 
         endTurn(roomCode);
+    });
+
+    // Player closes win modal
+    socket.on('close-win-modal', () => {
+        const roomCode = socket.roomCode;
+        const room = rooms[roomCode];
+
+        if (!room || room.phase !== 'finished') return;
+
+        // Track that this player closed the modal
+        if (!room.playersClosedModal.includes(socket.id)) {
+            room.playersClosedModal.push(socket.id);
+        }
+
+        // Check if all players have closed the modal
+        if (room.playersClosedModal.length === room.players.length) {
+            // Prompt host to start new game
+            const hostSocket = io.sockets.sockets.get(room.host);
+            if (hostSocket) {
+                hostSocket.emit('prompt-new-game');
+            }
+        }
+    });
+
+    // Host starts a new game
+    socket.on('start-new-game', () => {
+        const roomCode = socket.roomCode;
+        const room = rooms[roomCode];
+
+        if (!room || room.host !== socket.id) return;
+
+        console.log(`Host starting new game in room ${roomCode}`);
+
+        // Reset game state but keep players
+        room.gameStarted = false;
+        room.phase = 'lobby';
+        room.solution = null;
+        room.currentTurn = null;
+        room.turnPhase = null;
+        room.pendingSuggestion = null;
+        room.eliminatedPlayers = [];
+        room.winner = null;
+        room.diceResult = null;
+        room.pawns = {};
+        room.weapons = {};
+        room.playerCards = {};
+        room.lastSuggestionRoom = {};
+        room.playersClosedModal = [];
+
+        // Reset player state
+        room.players.forEach(p => {
+            p.character = null;
+            p.cards = [];
+            p.position = null;
+            p.hasAccused = false;
+            p.eliminated = false;
+        });
+
+        // Notify all players to return to lobby
+        io.to(roomCode).emit('return-to-lobby', {
+            players: room.players.map(p => ({ id: p.id, name: p.name })),
+            hostId: room.host,
+            roomCode: roomCode
+        });
+    });
+
+    // Host declines new game
+    socket.on('decline-new-game', () => {
+        const roomCode = socket.roomCode;
+        const room = rooms[roomCode];
+
+        if (!room || room.host !== socket.id) return;
+
+        console.log(`Host declined new game in room ${roomCode}`);
+
+        // Notify all players game is ending
+        io.to(roomCode).emit('game-ended');
+
+        // Clean up room
+        delete rooms[roomCode];
     });
 
     // Handle disconnection

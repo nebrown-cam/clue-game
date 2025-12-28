@@ -82,6 +82,9 @@ const winModal = document.getElementById('win-modal');
 const winTitle = document.getElementById('win-title');
 const solutionCards = document.getElementById('solution-cards');
 const closeWinModal = document.getElementById('close-win-modal');
+const newGameModal = document.getElementById('new-game-modal');
+const confirmNewGame = document.getElementById('confirm-new-game');
+const declineNewGame = document.getElementById('decline-new-game');
 
 // ============================================
 // TURN INFO MESSAGE QUEUE
@@ -326,6 +329,18 @@ function exitDisproveMode() {
 // Win Modal
 closeWinModal.addEventListener('click', () => {
     winModal.classList.add('hidden');
+    socket.emit('close-win-modal');
+});
+
+// New Game Modal
+confirmNewGame.addEventListener('click', () => {
+    newGameModal.classList.add('hidden');
+    socket.emit('start-new-game');
+});
+
+declineNewGame.addEventListener('click', () => {
+    newGameModal.classList.add('hidden');
+    socket.emit('decline-new-game');
 });
 
 // ============================================
@@ -476,6 +491,16 @@ socket.on('suggestion-made', (data) => {
     renderPawns();
     renderWeapons();
 
+    // Disable all action controls during disproving process
+    suggestBtn.disabled = true;
+    suggestSuspect.disabled = true;
+    suggestWeapon.disabled = true;
+    accuseBtn.disabled = true;
+    accuseSuspect.disabled = true;
+    accuseWeapon.disabled = true;
+    accuseRoom.disabled = true;
+    endTurnBtn.disabled = true;
+
     let msg = `${playerName} suggests: ${CHARACTERS[suspect].name} with the ${WEAPON_NAMES[weapon]} in the ${ROOM_NAMES[room]}.`;
     if (summonedPlayer) {
         msg += ` ${summonedPlayer} was summoned to the ${ROOM_NAMES[room]}.`;
@@ -604,6 +629,94 @@ socket.on('error-message', (message) => {
     } else {
         errorMessage.textContent = message;
     }
+});
+
+socket.on('prompt-new-game', () => {
+    // Host is prompted to start a new game
+    newGameModal.classList.remove('hidden');
+});
+
+socket.on('return-to-lobby', (data) => {
+    const { players, hostId, roomCode } = data;
+
+    // Reset client state
+    myCharacter = null;
+    myPosition = null;
+    myCards = [];
+    wasSummoned = false;
+    turnMessages.length = 0;
+
+    gameState = {
+        players: [],
+        currentTurn: null,
+        turnPhase: null,
+        pawns: {},
+        weapons: {},
+        diceResult: null,
+        currentRoom: null
+    };
+
+    // Update lobby state
+    isHost = (socket.id === hostId);
+
+    // Switch back to lobby screen
+    gameScreen.classList.add('hidden');
+    lobbyScreen.classList.remove('hidden');
+
+    // Update lobby display
+    displayRoomCode.textContent = roomCode;
+
+    // Update players list
+    playersList.innerHTML = '';
+    players.forEach(player => {
+        const li = document.createElement('li');
+        li.textContent = player.name;
+        if (player.id === hostId) li.classList.add('host');
+        if (player.id === myPlayerId) li.classList.add('you');
+        playersList.appendChild(li);
+    });
+
+    // Show/hide start button
+    if (isHost && players.length >= 3) {
+        startBtn.classList.remove('hidden');
+        waitingMessage.textContent = `${players.length} players ready. You can start!`;
+    } else {
+        startBtn.classList.add('hidden');
+        if (players.length < 3) {
+            waitingMessage.textContent = `Waiting for at least ${3 - players.length} more player(s)...`;
+        } else {
+            waitingMessage.textContent = 'Waiting for host to start...';
+        }
+    }
+});
+
+socket.on('game-ended', () => {
+    // Game has ended, return to join screen
+    joinScreen.classList.remove('hidden');
+    lobbyScreen.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    newGameModal.classList.add('hidden');
+    winModal.classList.add('hidden');
+
+    // Reset all state
+    myPlayerId = null;
+    myCharacter = null;
+    myPosition = null;
+    myCards = [];
+    isHost = false;
+    currentRoomCode = null;
+    wasSummoned = false;
+    turnMessages.length = 0;
+
+    gameState = {
+        players: [],
+        currentTurn: null,
+        turnPhase: null,
+        pawns: {},
+        weapons: {},
+        diceResult: null,
+        currentRoom: null
+    };
 });
 
 // ============================================
