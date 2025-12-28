@@ -942,6 +942,15 @@ function renderPawns() {
 function renderWeapons() {
     weaponsLayer.innerHTML = '';
 
+    const weaponImages = {
+        candlestick: 'WeaponCandlestick.png',
+        knife: 'WeaponKnife.png',
+        leadpipe: 'WeaponLeadPipe.png',
+        revolver: 'WeaponRevolver.png',
+        rope: 'WeaponRope.png',
+        wrench: 'WeaponWrench.png'
+    };
+
     for (const [weapon, room] of Object.entries(gameState.weapons)) {
         const squares = ROOM_SQUARES[room];
         if (!squares) continue;
@@ -960,7 +969,7 @@ function renderWeapons() {
         weaponDiv.className = 'weapon';
 
         const img = document.createElement('img');
-        img.src = `images/Weapon${weapon.charAt(0).toUpperCase() + weapon.slice(1)}.png`;
+        img.src = `images/${weaponImages[weapon]}`;
         img.alt = WEAPON_NAMES[weapon];
 
         weaponDiv.appendChild(img);
