@@ -246,7 +246,7 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Main Layout: 70% board / 30% panel */
+/* Main Layout: 55% board / 15% middle / 30% panel */
 .game-layout {
     display: flex;
     flex: 1;
@@ -255,12 +255,22 @@ body {
 
 /* Board Container */
 .board-container {
-    flex: 0 0 70%;
+    flex: 0 0 55%;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
     background: rgba(0, 0, 0, 0.3);
+}
+
+/* Middle Column (Your Cards) */
+.middle-column {
+    flex: 0 0 15%;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.4);
+    overflow-y: auto;
 }
 
 #game-board {
@@ -437,6 +447,12 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+/* Cards in middle column stack vertically */
+.middle-column .cards-container {
+    flex-direction: column;
+    align-items: center;
 }
 
 .card {
