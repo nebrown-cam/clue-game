@@ -275,10 +275,9 @@ body {
 
 #game-board {
     position: relative;
-    width: var(--board-size);
-    height: var(--board-size);
-    max-width: 720px;
-    max-height: 720px;
+    width: 100%;
+    max-width: min(100%, 85vh);
+    aspect-ratio: 1;
 }
 
 #board-image {
@@ -422,7 +421,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    max-height: 100px;
+    max-height: 150px;
     overflow-y: auto;
     padding: 10px;
     background: rgba(0, 0, 0, 0.2);
