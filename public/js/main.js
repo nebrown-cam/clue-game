@@ -43,6 +43,9 @@ const gamePlayers = document.getElementById('game-players');
 const turnInfo = document.getElementById('turn-info');
 const yourCards = document.getElementById('your-cards');
 
+// Audio
+const diceSound = new Audio('/audio/dice.wav');
+
 // Controls
 const rollBtn = document.getElementById('roll-btn');
 const stayBtn = document.getElementById('stay-btn');
@@ -227,6 +230,8 @@ startBtn.addEventListener('click', () => {
 
 rollBtn.addEventListener('click', () => {
     wasSummoned = false;
+    diceSound.currentTime = 0;
+    diceSound.play();
     socket.emit('roll-dice');
 });
 

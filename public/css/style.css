@@ -11,8 +11,8 @@
     --board-size: min(70vw, 80vh);
     --card-width: 120px;
     --card-height: 168px;
-    --card-thumb-width: 92px;
-    --card-thumb-height: 137px;
+    --card-thumb-width: 9.5vh;
+    --card-thumb-height: 14vh;
 
     /* Colors - Clue theme */
     --bg-dark: #1a1a2e;
