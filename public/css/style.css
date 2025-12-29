@@ -448,10 +448,21 @@ body {
     gap: 8px;
 }
 
-/* Cards in middle column stack vertically */
+/* Cards in middle column stack vertically and fill available space */
 .middle-column .cards-container {
+    flex: 1;
     flex-direction: column;
     align-items: center;
+    justify-content: space-evenly;
+}
+
+/* Cards in middle column scale to fit */
+.middle-column .card {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    flex: 1 1 12%;
+    aspect-ratio: 0.67;
 }
 
 .card {
