@@ -99,12 +99,12 @@ Every square that is NOT part of a room and NOT in the blocked list above is a w
 
 **Room Entry:**
 - Players can click anywhere inside a room to enter (if within movement range of any unblocked door)
-- Entering a room is free (does not cost movement) once player reaches the hallway square in front of a door
+- Entering a room costs 1 movement (stepping from hallway into the room)
 - Door squares are used for pathfinding validation only
 
 **Room Exit:**
 - Players can leave a room from any door in that room
-- Exiting a room door does not cost movement
+- Exiting a room costs 1 movement (stepping from room to hallway)
 - Movement calculation must account for all possible exit doors when determining reachable squares
 
 **Door Blocking:**

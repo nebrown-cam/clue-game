@@ -847,33 +847,17 @@ function getCardImage(card) {
 }
 
 // Available squares within each room for placing pawns and weapons
-const ROOM_SQUARES = {
-    study:        [{ col: 1, row: 1 }, { col: 2, row: 1 }, { col: 3, row: 1 }, { col: 4, row: 1 }, { col: 5, row: 1 },
-                   { col: 1, row: 2 }, { col: 2, row: 2 }, { col: 3, row: 2 }, { col: 4, row: 2 }, { col: 5, row: 2 }],
-    hall:         [{ col: 10, row: 2 }, { col: 11, row: 2 }, { col: 12, row: 2 }, { col: 13, row: 2 },
-                   { col: 10, row: 3 }, { col: 11, row: 3 }, { col: 12, row: 3 }, { col: 13, row: 3 },
-                   { col: 10, row: 4 }, { col: 11, row: 4 }, { col: 12, row: 4 }, { col: 13, row: 4 }],
-    lounge:       [{ col: 18, row: 1 }, { col: 19, row: 1 }, { col: 20, row: 1 }, { col: 21, row: 1 },
-                   { col: 18, row: 2 }, { col: 19, row: 2 }, { col: 20, row: 2 }, { col: 21, row: 2 },
-                   { col: 18, row: 3 }, { col: 19, row: 3 }, { col: 20, row: 3 }, { col: 21, row: 3 }],
-    library:      [{ col: 2, row: 7 }, { col: 3, row: 7 }, { col: 4, row: 7 },
-                   { col: 2, row: 8 }, { col: 3, row: 8 }, { col: 4, row: 8 },
-                   { col: 2, row: 9 }, { col: 3, row: 9 }, { col: 4, row: 9 }],
-    dining:       [{ col: 17, row: 10 }, { col: 18, row: 10 }, { col: 19, row: 10 }, { col: 20, row: 10 },
-                   { col: 17, row: 11 }, { col: 18, row: 11 }, { col: 19, row: 11 }, { col: 20, row: 11 },
-                   { col: 17, row: 12 }, { col: 18, row: 12 }, { col: 19, row: 12 }, { col: 20, row: 12 }],
-    billiard:     [{ col: 1, row: 13 }, { col: 2, row: 13 }, { col: 3, row: 13 }, { col: 4, row: 13 },
-                   { col: 1, row: 14 }, { col: 2, row: 14 }, { col: 3, row: 14 }, { col: 4, row: 14 },
-                   { col: 1, row: 15 }, { col: 2, row: 15 }, { col: 3, row: 15 }, { col: 4, row: 15 }],
-    conservatory: [{ col: 2, row: 20 }, { col: 3, row: 20 }, { col: 4, row: 20 },
-                   { col: 2, row: 21 }, { col: 3, row: 21 }, { col: 4, row: 21 },
-                   { col: 2, row: 22 }, { col: 3, row: 22 }, { col: 4, row: 22 }],
-    ballroom:     [{ col: 10, row: 18 }, { col: 11, row: 18 }, { col: 12, row: 18 }, { col: 13, row: 18 },
-                   { col: 10, row: 19 }, { col: 11, row: 19 }, { col: 12, row: 19 }, { col: 13, row: 19 },
-                   { col: 10, row: 20 }, { col: 11, row: 20 }, { col: 12, row: 20 }, { col: 13, row: 20 }],
-    kitchen:      [{ col: 19, row: 19 }, { col: 20, row: 19 }, { col: 21, row: 19 }, { col: 22, row: 19 },
-                   { col: 19, row: 20 }, { col: 20, row: 20 }, { col: 21, row: 20 }, { col: 22, row: 20 },
-                   { col: 19, row: 21 }, { col: 20, row: 21 }, { col: 21, row: 21 }, { col: 22, row: 21 }]
+// Room display areas for positioning pawns and weapons (1-based coordinates)
+const ROOM_DISPLAY_AREAS = {
+    study:        { minCol: 1, minRow: 1, maxCol: 7, maxRow: 4 },
+    hall:         { minCol: 10, minRow: 1, maxCol: 15, maxRow: 7 },
+    lounge:       { minCol: 18, minRow: 1, maxCol: 24, maxRow: 6 },
+    library:      { minCol: 2, minRow: 7, maxCol: 6, maxRow: 11 },
+    dining:       { minCol: 17, minRow: 10, maxCol: 24, maxRow: 15 },
+    billiard:     { minCol: 1, minRow: 13, maxCol: 6, maxRow: 17 },
+    conservatory: { minCol: 2, minRow: 21, maxCol: 5, maxRow: 24 },
+    ballroom:     { minCol: 9, minRow: 18, maxCol: 16, maxRow: 23 },
+    kitchen:      { minCol: 19, minRow: 19, maxCol: 24, maxRow: 24 }
 };
 
 function renderPawns() {
@@ -909,26 +893,36 @@ function renderPawns() {
         // Calculate pixel position - center of the grid cell
         let x, y;
         if (position.room) {
-            // In a room - assign to a unique square
-            const squares = ROOM_SQUARES[position.room];
-            if (squares) {
+            // In a room - center pawns horizontally in the middle row
+            const area = ROOM_DISPLAY_AREAS[position.room];
+            if (area) {
                 const pawnsInRoom = Object.entries(gameState.pawns)
                     .filter(([c, p]) => p.room === position.room)
                     .map(([c]) => c);
                 const index = pawnsInRoom.indexOf(character);
-                // Use squares from the start of the list (weapons use the end)
-                const square = squares[Math.min(index, squares.length - 1)];
+                const pawnCount = pawnsInRoom.length;
 
-                x = GRID_ORIGIN_X + (square.col * CELL_WIDTH) + (CELL_WIDTH / 2);
-                y = GRID_ORIGIN_Y + (square.row * CELL_HEIGHT) + (CELL_HEIGHT / 2);
+                // Calculate center row (pawns go in upper-middle area)
+                const roomHeight = area.maxRow - area.minRow + 1;
+                const centerRow = area.minRow + Math.floor((roomHeight - 1) / 2);
+
+                // Calculate horizontal position - center the group of pawns
+                const roomWidth = area.maxCol - area.minCol + 1;
+                const startCol = area.minCol + Math.floor((roomWidth - pawnCount) / 2);
+                const col = startCol + index;
+
+                // 1-based coordinates: subtract 1 for pixel calculation
+                x = GRID_ORIGIN_X + ((col - 1) * CELL_WIDTH) + (CELL_WIDTH / 2);
+                y = GRID_ORIGIN_Y + ((centerRow - 1) * CELL_HEIGHT) + (CELL_HEIGHT / 2);
             } else {
-                x = GRID_ORIGIN_X + (position.col * CELL_WIDTH) + (CELL_WIDTH / 2);
-                y = GRID_ORIGIN_Y + (position.row * CELL_HEIGHT) + (CELL_HEIGHT / 2);
+                // Fallback to position coordinates
+                x = GRID_ORIGIN_X + ((position.col - 1) * CELL_WIDTH) + (CELL_WIDTH / 2);
+                y = GRID_ORIGIN_Y + ((position.row - 1) * CELL_HEIGHT) + (CELL_HEIGHT / 2);
             }
         } else {
-            // Hallway position - center of the cell
-            x = GRID_ORIGIN_X + (position.col * CELL_WIDTH) + (CELL_WIDTH / 2);
-            y = GRID_ORIGIN_Y + (position.row * CELL_HEIGHT) + (CELL_HEIGHT / 2);
+            // Hallway position - center of the cell (1-based coordinates)
+            x = GRID_ORIGIN_X + ((position.col - 1) * CELL_WIDTH) + (CELL_WIDTH / 2);
+            y = GRID_ORIGIN_Y + ((position.row - 1) * CELL_HEIGHT) + (CELL_HEIGHT / 2);
         }
 
         // Convert to percentage of board size
@@ -952,18 +946,25 @@ function renderWeapons() {
     };
 
     for (const [weapon, room] of Object.entries(gameState.weapons)) {
-        const squares = ROOM_SQUARES[room];
-        if (!squares) continue;
+        const area = ROOM_DISPLAY_AREAS[room];
+        if (!area) continue;
 
         // Get all weapons in this room and find this weapon's index
         const weaponsInRoom = Object.entries(gameState.weapons)
             .filter(([w, r]) => r === room)
             .map(([w]) => w);
         const index = weaponsInRoom.indexOf(weapon);
+        const weaponCount = weaponsInRoom.length;
 
-        // Use a square from the end of the list (separate from pawns which use the start)
-        const squareIndex = squares.length - 1 - index;
-        const square = squares[Math.max(0, squareIndex)];
+        // Calculate weapon row (one row below center, where pawns are)
+        const roomHeight = area.maxRow - area.minRow + 1;
+        const centerRow = area.minRow + Math.floor((roomHeight - 1) / 2);
+        const weaponRow = centerRow + 1;
+
+        // Calculate horizontal position - center the group of weapons
+        const roomWidth = area.maxCol - area.minCol + 1;
+        const startCol = area.minCol + Math.floor((roomWidth - weaponCount) / 2);
+        const col = startCol + index;
 
         const weaponDiv = document.createElement('div');
         weaponDiv.className = 'weapon';
@@ -974,8 +975,9 @@ function renderWeapons() {
 
         weaponDiv.appendChild(img);
 
-        const x = GRID_ORIGIN_X + (square.col * CELL_WIDTH) + CELL_WIDTH / 2;
-        const y = GRID_ORIGIN_Y + (square.row * CELL_HEIGHT) + CELL_HEIGHT / 2;
+        // 1-based coordinates: subtract 1 for pixel calculation
+        const x = GRID_ORIGIN_X + ((col - 1) * CELL_WIDTH) + CELL_WIDTH / 2;
+        const y = GRID_ORIGIN_Y + ((weaponRow - 1) * CELL_HEIGHT) + CELL_HEIGHT / 2;
 
         weaponDiv.style.left = `${(x / BOARD_SIZE) * 100}%`;
         weaponDiv.style.top = `${(y / BOARD_SIZE) * 100}%`;
@@ -1150,11 +1152,11 @@ gameBoard.addEventListener('click', (e) => {
     const clickX = (e.clientX - rect.left) * scale;
     const clickY = (e.clientY - rect.top) * scale;
 
-    // Convert to grid coordinates
-    const col = Math.floor((clickX - GRID_ORIGIN_X) / CELL_WIDTH);
-    const row = Math.floor((clickY - GRID_ORIGIN_Y) / CELL_HEIGHT);
+    // Convert to grid coordinates (1-based indexing)
+    const col = Math.floor((clickX - GRID_ORIGIN_X) / CELL_WIDTH) + 1;
+    const row = Math.floor((clickY - GRID_ORIGIN_Y) / CELL_HEIGHT) + 1;
 
-    if (col < 0 || col >= 24 || row < 0 || row >= 25) return;
+    if (col < 1 || col > 24 || row < 1 || row > 25) return;
 
     socket.emit('move-pawn', { targetPosition: { col, row } });
 });
