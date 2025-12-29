@@ -255,9 +255,9 @@ body {
 
 /* Board Container */
 .board-container {
-    flex: 0 0 60%;
+    flex: 1;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     padding: 15px 20px 20px 20px;
     background: rgba(0, 0, 0, 0.4);
@@ -374,7 +374,7 @@ body {
     gap: 15px;
     padding: 15px;
     background: rgba(0, 0, 0, 0.4);
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 .panel-section {
