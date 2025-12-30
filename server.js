@@ -828,11 +828,13 @@ function continueDisproving(roomCode) {
         });
     }
 
-    // Notify others who is disproving
-    io.to(roomCode).emit('waiting-for-disprove', {
-        disproverId: disprover.id,
-        disproverName: disprover.name
-    });
+    // Notify others (not the disprover) who is disproving
+    if (disproverSocket) {
+        disproverSocket.broadcast.to(roomCode).emit('waiting-for-disprove', {
+            disproverId: disprover.id,
+            disproverName: disprover.name
+        });
+    }
 }
 
 // Helper: End current turn and move to next player

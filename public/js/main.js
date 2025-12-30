@@ -521,19 +521,18 @@ socket.on('your-turn-to-disprove', (data) => {
     disproveMatchingCards = matchingCards.map(c => c.id);
     selectedDisproveCard = null;
 
-    // Update turn info with the suggestion
-    addTurnMessage(`${suggestion.suggesterName} suggests: ${CHARACTERS[suggestion.suspect].name} with the ${WEAPON_NAMES[suggestion.weapon]} in the ${ROOM_NAMES[suggestion.room]}. Select a card to show.`);
-
     // Show the card action buttons
     cardActionButtons.classList.remove('hidden');
 
     if (canDisprove) {
+        // Tell player to select a card to show
+        addTurnMessage(`Select a card to show ${suggestion.suggesterName}.`);
         showCardActionBtn.disabled = true; // Enabled when a card is selected
         passCardBtn.disabled = true;
         passCardBtn.classList.add('hidden');
     } else {
         // No matching cards - can only pass
-        addTurnMessage(`${suggestion.suggesterName} suggests: ${CHARACTERS[suggestion.suspect].name} with the ${WEAPON_NAMES[suggestion.weapon]} in the ${ROOM_NAMES[suggestion.room]}. You have no matching cards.`);
+        addTurnMessage(`You have no matching cards. Click Pass.`);
         showCardActionBtn.disabled = true;
         showCardActionBtn.classList.add('hidden');
         passCardBtn.disabled = false;
