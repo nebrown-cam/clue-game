@@ -999,7 +999,11 @@ function updateTurnInfo() {
     if (isMyTurn) {
         switch (gameState.turnPhase) {
             case 'roll':
-                addTurnMessage("Your turn! Roll the dice or use a secret passage.");
+                if (canUseSecretPassage()) {
+                    addTurnMessage("Your turn! Roll the dice or use a secret passage.");
+                } else {
+                    addTurnMessage("Your turn! Roll the dice.");
+                }
                 break;
             case 'move':
                 addTurnMessage(`You rolled ${gameState.diceResult}. Click a room or square to move.`);

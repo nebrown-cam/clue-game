@@ -357,6 +357,12 @@ function dealCards(playerCount) {
         playerIndex = (playerIndex + 1) % playerCount;
     }
 
+    // Sort each hand by type: suspect, weapon, room
+    const typeOrder = { suspect: 0, weapon: 1, room: 2 };
+    for (const hand of playerHands) {
+        hand.sort((a, b) => typeOrder[a.type] - typeOrder[b.type]);
+    }
+
     return { solution, playerHands };
 }
 
