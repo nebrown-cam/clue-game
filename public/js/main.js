@@ -487,10 +487,13 @@ socket.on('suggestion-made', (data) => {
     gameState.pawns = pawns;
     gameState.weapons = weapons;
 
-    // Update myPosition if current player was summoned
+    // Update myPosition if current player's character was involved
     if (myCharacter === suspect) {
         myPosition = pawns[suspect];
-        wasSummoned = true;
+        // Only set wasSummoned if we were actually moved (server confirms via summonedPlayer)
+        if (summonedPlayer === myPlayerName) {
+            wasSummoned = true;
+        }
     }
 
     renderPawns();
@@ -563,8 +566,8 @@ socket.on('card-shown-to-you', (data) => {
 });
 
 socket.on('card-shown', (data) => {
-    const { showerName, suggesterName } = data;
-    addTurnMessage(`${showerName} showed a card to ${suggesterName}.`);
+    const { showerName, suggesterName, suspect, weapon, room } = data;
+    addTurnMessage(`${showerName} showed a card to ${suggesterName} (${CHARACTERS[suspect].name}, ${WEAPON_NAMES[weapon]}, ${ROOM_NAMES[room]}).`);
 });
 
 socket.on('player-cannot-disprove', (data) => {

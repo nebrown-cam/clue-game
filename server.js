@@ -413,16 +413,26 @@ io.on('connection', (socket) => {
 
         console.log(`${player.name} suggests: ${suspect} with ${weapon} in ${currentRoom}`);
 
+        // Check if a player's pawn will be moved (they weren't already in this room)
+        const suspectPlayer = room.players.find(p => p.character === suspect && p.id !== socket.id);
+        let summonedPlayer = null;
+        if (suspectPlayer) {
+            const suspectCurrentRoom = game.getRoomAtPosition(suspectPlayer.position);
+            if (suspectCurrentRoom !== currentRoom) {
+                // Player was actually moved from a different location
+                summonedPlayer = suspectPlayer;
+            }
+        }
+
         // Move suspect pawn to the room
         room.pawns[suspect] = { ...game.getRoomCenter(currentRoom), room: currentRoom };
 
         // Move weapon to the room
         room.weapons[weapon] = currentRoom;
 
-        // Check if a player's pawn was moved (notify them)
-        const summonedPlayer = room.players.find(p => p.character === suspect && p.id !== socket.id);
-        if (summonedPlayer) {
-            summonedPlayer.position = room.pawns[suspect];
+        // Update the suspect player's position (whether they were summoned or not)
+        if (suspectPlayer) {
+            suspectPlayer.position = room.pawns[suspect];
         }
 
         // Set up suggestion for disproving
@@ -504,7 +514,10 @@ io.on('connection', (socket) => {
             showerId: disprover.id,
             showerName: disprover.name,
             suggesterId: suggestion.suggesterId,
-            suggesterName: suggestion.suggesterName
+            suggesterName: suggestion.suggesterName,
+            suspect: suggestion.suspect,
+            weapon: suggestion.weapon,
+            room: suggestion.room
         });
 
         // End the suggestion
